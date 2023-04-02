@@ -14,43 +14,24 @@ import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.FileList;
+import com.google.api.services.drive.model.File;
 import com.kiddo.common.ConfigKey;
 import com.kiddo.common.ConfigProvider;
 
 import java.io.*;
-import java.io.File;
 import java.security.GeneralSecurityException;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 public class GoogleDriveUploader implements FileUploader {
-    private static final String APPLICATION_NAME = "My Application";
+    private static final String APPLICATION_NAME = "KiddoUploader";
     private static final String FOLDER_MIME_TYPE = "application/vnd.google-apps.folder";
     private static final JsonFactory JSON_FACTORY = GsonFactory.getDefaultInstance();
-    private static final List<String> SCOPES = Collections.singletonList(DriveScopes.DRIVE_METADATA_READONLY);
-    /**
-     * Directory to store authorization tokens for this application.
-     */
+    private static final Set<String> SCOPES = DriveScopes.all();
     private static final String TOKENS_DIRECTORY_PATH = "tokens";
     private final Drive drive;
     private final int batchSize;
-
-    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, final String credentials)
-            throws IOException {
-        try (InputStream inputStream = new ByteArrayInputStream(credentials.getBytes())) {
-            GoogleClientSecrets clientSecrets =
-                    GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(inputStream));
-
-            // Build flow and trigger user authorization request.
-            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(
-                    HTTP_TRANSPORT, JSON_FACTORY, clientSecrets, SCOPES)
-                    .setDataStoreFactory(new FileDataStoreFactory(new java.io.File(TOKENS_DIRECTORY_PATH)))
-                    .setAccessType("offline")
-                    .build();
-            LocalServerReceiver receiver = new LocalServerReceiver.Builder().setPort(8888).build();
-            return new AuthorizationCodeInstalledApp(flow, receiver).authorize("oktaviandi@gmail.com");
-        }
-    }
 
     public GoogleDriveUploader(ConfigProvider configProvider) throws GeneralSecurityException, IOException {
         final NetHttpTransport HTTP_TRANSPORT = GoogleNetHttpTransport.newTrustedTransport();
@@ -61,33 +42,72 @@ public class GoogleDriveUploader implements FileUploader {
         batchSize = Integer.parseInt(configProvider.getConfig(ConfigKey.BATCH_SIZE));
     }
 
+    /**
+     * Upload the content of source path to destination path in Google Drive. This copy both files and subfolders.
+     * @param sourcePath Local folder.
+     * @param destinationPath Destination folder in Drive. It'll be created if it doesn't exists.
+     * @throws IOException
+     */
     @Override
     public void upload(String sourcePath, String destinationPath) throws IOException {
         String parentId = getParentDestination(destinationPath);
+        java.io.File sourceFolder = new java.io.File(sourcePath);
+        uploadFilesFromFolder(sourceFolder, parentId);
+    }
 
-        // Upload the folder contents in batches in case the source path has lots of file.
-        File folder = new File(sourcePath);
-        List<String> parents = Collections.singletonList(parentId);
-        List<File> files = Arrays.asList(Objects.requireNonNull(folder.listFiles()));
-        int batchCount = (int) Math.ceil((double) files.size() / batchSize);
-        for (int i = 0; i < batchCount; i++) {
-            int fromIndex = i * batchSize;
-            int toIndex = Math.min((i + 1) * batchSize, files.size());
-            List<File> batchFiles = new ArrayList<>(files.subList(fromIndex, toIndex));
-            List<com.google.api.services.drive.model.File> batchUploadedFiles = batchFiles.stream()
-                    .map(f -> {
-                        FileContent fileContent = new FileContent(null, f);
-                        com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
-                        fileMetadata.setName((f.getName()));
-                        fileMetadata.setParents(parents);
-                        try {
-                            return drive.files().create(fileMetadata, fileContent).execute();
-                        } catch (IOException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .toList();
-            System.out.println("Uploaded " + batchUploadedFiles.size() + " files to Google Drive.");
+    private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, final String credentials)
+            throws IOException {
+        try (InputStream inputStream = new ByteArrayInputStream(credentials.getBytes())) {
+            GoogleClientSecrets clientSecrets =
+                    GoogleClientSecrets.load(JSON_FACTORY, new InputStreamReader(inputStream));
+
+            GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
+                    clientSecrets, SCOPES).build();
+            Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize(APPLICATION_NAME);
+
+            System.out.println(credential.getAccessToken());
+            return credential;
+        }
+    }
+
+
+    private void uploadFilesFromFolder(java.io.File folder, String folderId) throws IOException {
+        java.io.File[] files = folder.listFiles();
+        final List<String> parent = Collections.singletonList(folderId);
+        if (files != null) {
+            List<java.io.File> fileList = Arrays.asList(files);
+            IntStream.range(0, (int) Math.ceil((double) fileList.size() / batchSize))
+                    .parallel()
+                    .forEach(batch -> {
+                        List<java.io.File> batchList = fileList.subList(batch * batchSize, Math.min((batch + 1) * batchSize, fileList.size()));
+                        batchList.forEach(file -> {
+                            if (file.isDirectory()) {
+                                // Recursive call to handle sub-folder
+                                File subFolderMetadata = new File();
+                                subFolderMetadata.setName(file.getName());
+                                subFolderMetadata.setMimeType(FOLDER_MIME_TYPE);
+                                subFolderMetadata.setParents(parent);
+                                try {
+                                    File subFolder = drive.files().create(subFolderMetadata).execute();
+                                    System.out.println("Folder " + file.getName() + " created successfully!");
+                                    uploadFilesFromFolder(file, subFolder.getId());
+                                } catch (IOException e) {
+                                    System.err.println("Error creating sub-folder " + file.getName() + ": " + e.getMessage());
+                                }
+                            } else {
+                                com.google.api.services.drive.model.File fileMetadata = new File();
+                                fileMetadata.setName(file.getName());
+                                fileMetadata.setParents(parent);
+                                FileContent mediaContent = new FileContent(null, file);
+                                try {
+                                    File uploadedFile = drive.files().create(fileMetadata, mediaContent).execute();
+                                    System.out.println("File " + uploadedFile.getName() + " uploaded successfully!");
+                                } catch (IOException e) {
+                                    System.err.println("Error uploading file " + file.getName() + ": " + e.getMessage());
+                                }
+                            }
+                        });
+                    });
         }
     }
 
