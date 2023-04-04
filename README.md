@@ -28,6 +28,11 @@ Running the program multiple times will create multiple files in Google Drive. I
   - The two command line arguments for source and destination folders.
   - The environment variable that points to Google API credential file.
 - When the Google Oauth consent screen is shown, allows the code to manage Google Drive as shown in the next image. Must select the first checkbox. Otherwise, we'll get insufficient permission error.
+![Screenshot 2023-04-04 at 16 23 25](https://user-images.githubusercontent.com/2534953/229761108-7d168cf3-1249-4f3d-8349-140c8acaa25d.png)
+
+### Screenshots of Output
+Screenshots in my Google Drive after I uploaded my local drive multiple times. Notice that there're many Folder2 as name isn't unique in Drive.
+![Screenshot 2023-04-04 at 17 15 42](https://user-images.githubusercontent.com/2534953/229761497-ef4b7005-f348-4059-bc3e-7a037af053d3.png)
 
 ## ParseTextFromImage
 This parses the image from a given folders. Initially, I tried to parse some images in `resources -> original-images` folder using [tesseract](https://github.com/tesseract-ocr/tesseract) which failed in the default configuration to provide any meaningful result. The images are hard to parse in the default configuration due to its complex layout. Here are some examples of parsing the image using Tesseract:
@@ -47,6 +52,11 @@ Fair to say both word checkers are naive. It'll be simple to swap the implementa
 - The code was created using IntelliJ IDEA.
 - Just open this in IntelliJ and set the followings:
     - The command line argument for the destination folder.
+
+### Screenshots of Output
+Screenshot of my local folder where there're two output files for every ImageWithWords1-4.
+![Screenshot 2023-04-04 at 17 10 58](https://user-images.githubusercontent.com/2534953/229761765-7ce72c09-8bc4-425a-b875-c95cf7a5fbe5.png)
+
 
 # Improvements
 - We could easily add some sort of CLI shell like Spring Shell or [Picocli](https://picocli.info/) to make it easier to run the code.
