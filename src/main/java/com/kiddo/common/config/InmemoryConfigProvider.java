@@ -17,7 +17,7 @@ public class InmemoryConfigProvider implements ConfigProvider {
                 try {
                     return Files.readString(Paths.get(fileName), StandardCharsets.UTF_8);
                 } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    throw new RuntimeException("Google API Credential isn't found", e);
                 }
             }
             case BATCH_SIZE -> {
