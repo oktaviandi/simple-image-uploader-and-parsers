@@ -42,3 +42,10 @@ Fair to say both word checkers are naive. It'll be simple to swap the implementa
 - The code was created using IntelliJ IDEA.
 - Just open this in IntelliJ and set the followings:
     - The command line argument for the destination folder.
+
+## Out of Scope
+- Tuning tesseract; we don't care what tool is used to parse the text from image. Don't feel tuning tesseract is worth the hassle. Better to use Google Cloud Vision API that produces instant result.
+- Also, we don't call vision API directly as there's really no benefit. We've gotten the result from running Google Vision API using Google Cloud CLI which should product the same result.
+
+# Improvements
+- Add unit tests.
