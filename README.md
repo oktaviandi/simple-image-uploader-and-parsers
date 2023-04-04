@@ -28,6 +28,7 @@ Running the program multiple times will create multiple files in Google Drive. I
   - The two command line arguments for source and destination folders.
   - The environment variable that points to Google API credential file.
 - When the Google Oauth consent screen is shown, allows the code to manage Google Drive as shown in the next image. Must select the first checkbox. Otherwise, we'll get insufficient permission error.
+
 ![Screenshot 2023-04-04 at 16 23 25](https://user-images.githubusercontent.com/2534953/229761108-7d168cf3-1249-4f3d-8349-140c8acaa25d.png)
 
 ### Screenshots of Output
