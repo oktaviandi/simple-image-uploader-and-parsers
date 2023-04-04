@@ -65,11 +65,15 @@ public class GoogleDriveUploader implements FileUploader {
                     clientSecrets, SCOPES).build();
             Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize(APPLICATION_NAME);
 
-            System.out.println(credential.getAccessToken());
             return credential;
         }
     }
 
+    /*
+     *  Recursively upload files from source folder to destination folder in Google Drive.
+     *  The folder hierarchy will be maintained. Parallel processing is used here to cater for cases where there're many
+     *  files within a folder. This should help from getting throttled from Google as well.
+     */
 
     private void uploadFilesFromFolder(java.io.File folder, String folderId) throws IOException {
         java.io.File[] files = folder.listFiles();
