@@ -16,7 +16,7 @@ Running the program multiple times will create multiple files in Google Drive. I
 
 ## Prerequisite
 - The user needs to create a project in GCP with Google Drive API enabled.
-- The user needs to create a credential in GCP, download it and create an environment variable named `GOOGLE_CREDENTIALS` that points to the file. In production environment, this shuold be stored in config manager like AWS Parameter Store or GCP Secret Manager.
+- The user needs to create a credential in GCP, download it and create an environment variable named `GOOGLE_CREDENTIALS` that points to the file. In production environment, this should be stored in config manager like AWS Parameter Store or GCP Secret Manager.
 
 ## Running the code
 - The code was created using IntelliJ IDEA.
