@@ -10,18 +10,16 @@ import com.google.api.client.http.FileContent;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.gson.GsonFactory;
-import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.drive.Drive;
 import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.FileList;
 import com.google.api.services.drive.model.File;
-import com.kiddo.common.ConfigKey;
-import com.kiddo.common.ConfigProvider;
+import com.kiddo.common.config.ConfigKey;
+import com.kiddo.common.config.ConfigProvider;
 
 import java.io.*;
 import java.security.GeneralSecurityException;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class GoogleDriveUploader implements FileUploader {
@@ -55,6 +53,10 @@ public class GoogleDriveUploader implements FileUploader {
         uploadFilesFromFolder(sourceFolder, parentId);
     }
 
+    /*
+     * Create credential using OAuth2 flow to send data to Google Drive. The user must grant permissions to allow
+     * sending of data to Google Drive.
+     */
     private static Credential getCredentials(final NetHttpTransport HTTP_TRANSPORT, final String credentials)
             throws IOException {
         try (InputStream inputStream = new ByteArrayInputStream(credentials.getBytes())) {
@@ -63,9 +65,7 @@ public class GoogleDriveUploader implements FileUploader {
 
             GoogleAuthorizationCodeFlow flow = new GoogleAuthorizationCodeFlow.Builder(HTTP_TRANSPORT, JSON_FACTORY,
                     clientSecrets, SCOPES).build();
-            Credential credential = new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize(APPLICATION_NAME);
-
-            return credential;
+            return new AuthorizationCodeInstalledApp(flow, new LocalServerReceiver()).authorize(APPLICATION_NAME);
         }
     }
 
@@ -74,7 +74,6 @@ public class GoogleDriveUploader implements FileUploader {
      *  The folder hierarchy will be maintained. Parallel processing is used here to cater for cases where there're many
      *  files within a folder. This should help from getting throttled from Google as well.
      */
-
     private void uploadFilesFromFolder(java.io.File folder, String folderId) throws IOException {
         java.io.File[] files = folder.listFiles();
         final List<String> parent = Collections.singletonList(folderId);
@@ -97,6 +96,8 @@ public class GoogleDriveUploader implements FileUploader {
                                     uploadFilesFromFolder(file, subFolder.getId());
                                 } catch (IOException e) {
                                     System.err.println("Error creating sub-folder " + file.getName() + ": " + e.getMessage());
+                                    // TODO: explores how we should handle this. For now we just silently print the error.
+                                    // One idea is to collect the errorneous files and let the user retries those files only.
                                 }
                             } else {
                                 com.google.api.services.drive.model.File fileMetadata = new File();

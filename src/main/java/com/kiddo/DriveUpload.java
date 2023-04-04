@@ -1,7 +1,7 @@
 package com.kiddo;
 
-import com.kiddo.common.ConfigProvider;
-import com.kiddo.common.InmemoryConfigProvider;
+import com.kiddo.common.config.ConfigProvider;
+import com.kiddo.common.config.InmemoryConfigProvider;
 import com.kiddo.uploader.FileUploader;
 import com.kiddo.uploader.GoogleDriveUploader;
 

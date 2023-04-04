@@ -1,4 +1,4 @@
-package com.kiddo.common;
+package com.kiddo.common.config;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -11,7 +11,6 @@ import java.nio.file.Paths;
 public class InmemoryConfigProvider implements ConfigProvider {
     @Override
     public String getConfig(ConfigKey key) {
-        System.out.println("Get config for " + key.name());
         switch (key) {
             case GOOGLE_CREDENTIAL -> {
                 String fileName = System.getenv("GOOGLE_CREDENTIALS");
@@ -25,6 +24,6 @@ public class InmemoryConfigProvider implements ConfigProvider {
                 return "10";
             }
         }
-        return null;
+        throw new RuntimeException("Config " + key.name() + " can not be processed");
     }
 }
