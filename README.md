@@ -27,6 +27,7 @@ Running the program multiple times will create multiple files in Google Drive. I
 - Just open this in IntelliJ and set the followings:
   - The two command line arguments for source and destination folders.
   - The environment variable that points to Google API credential file.
+- When the Google Oauth consent screen is shown, allows the code to manage Google Drive as shown in the next image. Must select the first checkbox. Otherwise, we'll get insufficient permission error.
 
 ## ParseTextFromImage
 This parses the image from a given folders. Initially, I tried to parse some images in `resources -> original-images` folder using [tesseract](https://github.com/tesseract-ocr/tesseract) which failed in the default configuration to provide any meaningful result. The images are hard to parse in the default configuration due to its complex layout. Here are some examples of parsing the image using Tesseract:
