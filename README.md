@@ -14,7 +14,9 @@ The program accepts two command line arguments:
 
 The source folder can contain any number of files including any number of sub folders. The program will recursively write the files and folders to the destination in Google Drive. If the destination folder doesn't exist, the program will create it.
 
-Uploading the files and / or folder to Google is batched with batch size of 10. This should help if the folder has arbitrary huge numbers of files and / or subfolder. In the future, we can add some sort of wait between each batch to prevent throttling from Google side. Also, batch is stored as an in memory config. Ideally, this will be stored in proper config manager like AWS Parameter Store or GCP Secret Manager.
+Uploading the files and / or folder to Google is batched with batch size of 10. This should help if the folder has arbitrary huge numbers of files and / or subfolder. In the future, we can add some sort of wait between each batch to prevent throttling from Google side.
+
+The batch size is stored as an in memory config. Ideally, this will be stored in proper config manager like AWS Parameter Store or GCP Secret Manager.
 
 Running the program multiple times will create multiple files in Google Drive. It's just the way Google Drive works where filename is not unique.
 
@@ -102,5 +104,5 @@ Screenshot of my local folder where there're two output files for every ImageWit
 
 
 # Improvements
-- We could easily add some sort of CLI shell like Spring Shell or [Picocli](https://picocli.info/) to make it easier to run the code.
+- We could easily add some sort of CLI shell like [Spring Shell](https://docs.spring.io/spring-shell/docs/2.1.4/site/reference/htmlsingle/#_what_is_spring_shell) or [Picocli](https://picocli.info/) to make it easier to run the code.
 - Unit test would have been nice as well.
