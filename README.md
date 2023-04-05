@@ -36,9 +36,51 @@ Screenshots in my Google Drive after I uploaded my local drive multiple times. N
 ![Screenshot 2023-04-04 at 17 15 42](https://user-images.githubusercontent.com/2534953/229761497-ef4b7005-f348-4059-bc3e-7a037af053d3.png)
 
 ## ParseTextFromImage
-This parses the image from a given folders. Initially, I tried to parse some images in `resources -> original-images` folder using [tesseract](https://github.com/tesseract-ocr/tesseract) which failed in the default configuration to provide any meaningful result. The images are hard to parse in the default configuration due to its complex layout. Here are some examples of parsing the image using Tesseract:
+This parses the image from a given folders. Initially, I tried to parse some images in `resources -> original-images` folder using [tesseract](https://github.com/tesseract-ocr/tesseract) which failed in the default configuration to provide any meaningful result. The images are hard to parse in the default configuration due to its complex layout.
 
-Next, I tried to use Google Vision API to parse the image. I stored the results in the `resources -> vision-api-results` with the naming using the convention `original-file-name.json`.
+Here are some examples of parsing the image using Tesseract using default configuration:
+- ImageWithWords1.jpg
+```
+N T8/ &BntS L2 =
+= W BN, 0&“ e g :’/\‘)/h _§’f%/7_§ ‘:'-T
+e TN S/ s f el
+2 \lneg, / ~ =2 155 sl
+»’/\‘/ \3’;4/\%, Lo ~UE/ | IR LI
+> 0 VAR =l 2
+& . s o S e
+S OSTAE; s s gl 5/
+96, 2\ & o I :
+7 % e 1S /S TENG & S
+2ls's z & e )2 ST /b%
+288 = honey | Tousag®] / e, o/ oo o
+I B L S S Nl
+e £| | language | —r )
+g“‘ Tust FJ% £ | | languag ‘abOVE‘mOO"/§A“\‘e\<€/L‘head
+) ko] said ————— & |k o
+/‘;L SILIET “‘ﬂ“ﬁl& 0 [Smooth fread N2 | Mean,
+3 5 TR\ e TE >
+SIS ‘o éﬁ'@i%@/mwl\ — 2@\% 3
+ﬁ-’,’/‘s 'izoa,] P 2y 0/ | puice 2z 22 218\
+NS _{pw \,%,q \ = % [
+(I EIN .o,;% \/ ‘ ,.,i% 3
+D gy (el sire ] N7 \E
+SO TRC IO
+A Hg ) ol T A Aym] = J
+```
+- ImageWithWords2.png
+```
+i i"*‘;;ﬂ;ﬁ?ﬁw T
+L MO
+E “ﬂ o ” language § Mjg‘ f@%ﬂ g Eé,,:: "
+
+Al i geli=
+| 1 = PR T
+j_ﬁﬂﬂgfwmé"‘g ’
+```
+
+It's possible to tweak with some parameters and make parsing better. I don't feel it's worth the time to focus on this. 
+
+Instead, I tried to use Google Vision API to parse the image. I stored the results in the `resources -> vision-api-results` with the naming using the convention `original-file-name.json`.
 
 The code simply accepts an input which is the destination in the local file system where the output will be written. For each input, the program will create two outputs:
 - Filename_en.html where filename is the input filename. This contains all the english word parsed from the images. We're using a very simple definitions for English words:
@@ -61,3 +103,4 @@ Screenshot of my local folder where there're two output files for every ImageWit
 
 # Improvements
 - We could easily add some sort of CLI shell like Spring Shell or [Picocli](https://picocli.info/) to make it easier to run the code.
+- Unit test would have been nice as well.
